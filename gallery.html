@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>料理の写真｜天乃八</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f1e7;color:#211d1a;font-family:'Yu Mincho',serif}
+header{background:#211d1a;color:white;padding:17px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header a{color:white;text-decoration:none}
+main{max-width:1150px;margin:auto;padding:40px 18px 70px}
+h1,p{text-align:center}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:30px}
+.grid a{background:white;border-radius:8px;overflow:hidden;box-shadow:0 3px 14px #0002}
+.grid img{display:block;width:100%;height:230px;object-fit:cover;transition:transform .2s}
+.grid img:hover{transform:scale(1.04)}
+#notice{font-family:sans-serif;font-size:13px;color:#6b5141;min-height:1.3em}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.grid img{height:150px}}
+</style>
+</head>
+<body>
+<header><strong>天乃八</strong><a href="index.html">← トップページへ戻る</a></header>
+<main>
+<h1>料理の写真</h1>
+<p>写真をタップすると大きく表示できます。</p>
+<p id="notice" role="status">写真を読み込んでいます…</p>
+<div class="grid" id="gallery"></div>
+</main>
+<script>
+// GitHub の公開フォルダを読み取り、現在ある画像だけを表示します。
+// 写真の追加・削除・ファイル名変更に HTML の修正は不要です。
+const API = 'https://api.github.com/repos/aomusi45/tennoya/contents/food-photos?ref=main';
+const FALLBACK = ["1769686832878.png", "1769686833553.png", "20250618_194434.png", "20251015_215018.png", "20251108_191459.jpg", "20251108_191459.png", "20251210_215216.jpg", "20260110_120613.jpg", "20260110_120613.png", "20260110_120641.jpg", "20260118_022420.png", "いかまるごと.png", "ちゃんちゃん焼き.png", "とん平焼き.jpg", "カプレーゼ.jpg", "カプレーゼ.png", "ホッケ.jpg", "ラム焼き.jpg", "味噌ラーメン.jpg", "唐揚げタレ.jpg", "揚げ奴.jpg", "海老フライ.jpg", "醤油ラーメン.jpg", "鍋焼き.jpg", "餃子.jpg", "鶏塩.jpg"];
+const grid = document.getElementById('gallery');
+const notice = document.getElementById('notice');
+const isPhoto = name => /\.(?:jpg|jpeg|png|webp|gif|avif)$/i.test(name);
+function showPhotos(names) {
+  grid.replaceChildren();
+  names.forEach((name, i) => {
+    const path = 'food-photos/' + encodeURIComponent(name);
+    const a = document.createElement('a');
+    a.href = path;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    const img = document.createElement('img');
+    img.src = path;
+    img.alt = '天乃八の料理写真 ' + (i + 1);
+    img.loading = 'lazy';
+    a.appendChild(img);
+    grid.appendChild(a);
+  });
+}
+async function loadPhotos() {
+  try {
+    const response = await fetch(API, {cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+    if (!response.ok) throw new Error('GitHub API: ' + response.status);
+    const files = await response.json();
+    if (!Array.isArray(files)) throw new Error('Unexpected response');
+    const names = files.filter(item => item.type === 'file' && isPhoto(item.name))
+      .map(item => item.name).sort((a,b)=>a.localeCompare(b,'ja'));
+    showPhotos(names);
+    notice.textContent = names.length ? '' : '現在、料理写真はありません。';
+  } catch (error) {
+    // GitHub API が一時的に利用できない場合は元の26枚を表示します。
+    showPhotos(FALLBACK);
+    notice.textContent = '写真一覧を更新できませんでした。以前の写真一覧を表示しています。';
+    console.warn('Photo list update failed:', error);
+  }
+}
+loadPhotos();
+</script>
+</body>
+</html>
