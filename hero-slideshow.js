@@ -1,10 +1,11 @@
-/* トップの画像・動画を5秒ごとにクロスフェード */
+/* トップ画像・動画の切り替え。先頭の海老天丼は3秒、その他は5秒 */
 (() => {
   'use strict';
   const hero = document.querySelector('.hero');
   const media = window.TENNOYA_HERO_MEDIA;
   if (!hero || !Array.isArray(media) || !media.length) return;
-  const INTERVAL_MS = 5000;
+  const DEFAULT_INTERVAL_MS = 5000;
+  const FIRST_TENDON_MS = 3000;
   const FADE_MS = 900;
   const slides = media.map((item, i) => {
     const el = document.createElement(item.type === 'video' ? 'video' : 'img');
@@ -30,6 +31,12 @@
   });
   let current = 0;
   let busy = false;
+  let timer;
+  function scheduleNext() {
+    clearTimeout(timer);
+    const delay = current === 0 ? FIRST_TENDON_MS : DEFAULT_INTERVAL_MS;
+    timer = setTimeout(advance, delay);
+  }
   slides[0].classList.add('is-current');
   function startVideo(el) {
     if (el.tagName !== 'VIDEO') return;
@@ -60,14 +67,14 @@
     });
   }
   async function advance() {
-    if (busy || document.hidden) return;
+    if (busy || document.hidden) { scheduleNext(); return; }
     busy = true;
     let next = -1;
     for (let step = 1; step < slides.length; step++) {
       const candidate = (current + step) % slides.length;
       if (await ready(slides[candidate])) {next=candidate;break;}
     }
-    if (next < 0 || document.hidden) {busy=false;return;}
+    if (next < 0 || document.hidden) {busy=false;scheduleNext();return;}
     const from = slides[current], to = slides[next];
     startVideo(to);
     from.style.zIndex = '1';
@@ -89,9 +96,10 @@
         to.classList.add('is-current');
         current = next;
         busy = false;
+        scheduleNext();
       }, FADE_MS + 30);
     }));
   }
-  const timer = setInterval(advance, INTERVAL_MS);
-  addEventListener('pagehide', () => clearInterval(timer), {once:true});
+  scheduleNext();
+  addEventListener('pagehide', () => clearTimeout(timer), {once:true});
 })();
