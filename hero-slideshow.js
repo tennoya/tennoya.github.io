@@ -1,105 +1,79 @@
-/* トップ画像・動画の切り替え。先頭の海老天丼は3秒、その他は5秒 */
+/* 天乃八 トップスライド：先頭の海老天丼はフェード込み3秒、以降5秒 */
 (() => {
   'use strict';
   const hero = document.querySelector('.hero');
   const media = window.TENNOYA_HERO_MEDIA;
-  if (!hero || !Array.isArray(media) || !media.length) return;
-  const DEFAULT_INTERVAL_MS = 5000;
-  const FIRST_TENDON_MS = 3000;
-  const FADE_MS = 900;
+  if (!hero || !Array.isArray(media) || media.length < 2) return;
+  const DURATION_MS = 5000;
+  const FIRST_MS = 3000;
+  const FADE_MS = 700;
   const slides = media.map((item, i) => {
     const el = document.createElement(item.type === 'video' ? 'video' : 'img');
     el.className = 'hero-slide';
     el.setAttribute('aria-hidden', 'true');
     if (item.type === 'video') {
-      el.muted = true;
-      el.defaultMuted = true;
-      el.loop = true;
+      el.muted = true; el.defaultMuted = true; el.loop = true;
       el.playsInline = true;
       el.setAttribute('playsinline', '');
       el.setAttribute('webkit-playsinline', '');
-      el.preload = i < 2 ? 'auto' : 'metadata';
-      el.src = item.src;
+      el.preload = 'auto'; el.src = item.src;
     } else {
-      el.alt = '';
-      el.decoding = 'async';
-      el.loading = i === 0 ? 'eager' : 'lazy';
-      el.src = item.src;
+      el.alt = ''; el.decoding = 'async';
+      el.loading = i < 2 ? 'eager' : 'lazy'; el.src = item.src;
     }
     hero.insertBefore(el, hero.firstChild);
     return el;
   });
   let current = 0;
-  let busy = false;
-  let timer;
-  function scheduleNext() {
-    clearTimeout(timer);
-    const delay = current === 0 ? FIRST_TENDON_MS : DEFAULT_INTERVAL_MS;
-    timer = setTimeout(advance, delay);
-  }
+  let timer = null;
+  let changing = false;
+  let startedAt = performance.now();
   slides[0].classList.add('is-current');
-  function startVideo(el) {
+  function playVideo(el) {
     if (el.tagName !== 'VIDEO') return;
-    try {
-      el.currentTime = 0;
-      const result = el.play();
-      if (result && result.catch) result.catch(() => {});
-    } catch (_) {}
+    try { el.currentTime = 0; const p = el.play(); if (p?.catch) p.catch(() => {}); } catch (_) {}
   }
-  function ready(el) {
-    if (el.tagName === 'IMG') {
-      if (el.complete) return Promise.resolve(el.naturalWidth > 0);
-      return new Promise(resolve => {
-        const done = (ok) => {clearTimeout(timeout);el.removeEventListener('load', good);el.removeEventListener('error', bad);resolve(ok)};
-        const good = () => done(true), bad = () => done(false);
-        el.addEventListener('load', good, {once:true});el.addEventListener('error', bad, {once:true});
-        const timeout = setTimeout(() => done(false), 2200);
-      });
-    }
-    if (el.error) return Promise.resolve(false);
-    if (el.readyState >= 2) return Promise.resolve(true);
-    el.load();
-    return new Promise(resolve => {
-      const done = ok => {clearTimeout(timeout);el.removeEventListener('loadeddata',good);el.removeEventListener('error',bad);resolve(ok)};
-      const good=()=>done(true),bad=()=>done(false);
-      el.addEventListener('loadeddata',good,{once:true});el.addEventListener('error',bad,{once:true});
-      const timeout=setTimeout(()=>done(el.readyState>=2),2200);
-    });
+  playVideo(slides[0]);
+  // 画像・動画の読み込みは次の表示前に開始する。読み込み待ちを表示時間に足さない。
+  function preload(index) {
+    const el = slides[index];
+    if (el.tagName === 'VIDEO' && el.readyState === 0) el.load();
   }
-  async function advance() {
-    if (busy || document.hidden) { scheduleNext(); return; }
-    busy = true;
-    let next = -1;
-    for (let step = 1; step < slides.length; step++) {
-      const candidate = (current + step) % slides.length;
-      if (await ready(slides[candidate])) {next=candidate;break;}
-    }
-    if (next < 0 || document.hidden) {busy=false;scheduleNext();return;}
-    const from = slides[current], to = slides[next];
-    startVideo(to);
-    from.style.zIndex = '1';
-    from.style.opacity = '1';
-    to.style.transition = 'none';
-    to.style.opacity = '0';
-    to.style.zIndex = '2';
+  function schedule() {
+    clearTimeout(timer);
+    const duration = current === 0 ? FIRST_MS : DURATION_MS;
+    const startFadeAfter = duration - FADE_MS;
+    const remaining = Math.max(0, startedAt + startFadeAfter - performance.now());
+    timer = setTimeout(nextSlide, remaining);
+  }
+  function nextSlide() {
+    if (changing || document.hidden) { timer = setTimeout(nextSlide, 250); return; }
+    changing = true;
+    const previous = current;
+    current = (current + 1) % slides.length;
+    const from = slides[previous], to = slides[current];
+    playVideo(to);
+    from.style.transition = 'none';
+    from.style.zIndex = '1'; from.style.opacity = '1';
+    to.style.transition = 'none'; to.style.zIndex = '2'; to.style.opacity = '0';
     void to.offsetWidth;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       to.style.transition = `opacity ${FADE_MS}ms ease-in-out`;
       to.style.opacity = '1';
-      setTimeout(() => {
-        from.classList.remove('is-current');
-        from.style.opacity = '0';
-        from.style.zIndex = '0';
-        if (from.tagName === 'VIDEO') from.pause();
-        to.style.transition = 'none';
-        to.style.zIndex = '1';
-        to.classList.add('is-current');
-        current = next;
-        busy = false;
-        scheduleNext();
-      }, FADE_MS + 30);
-    }));
+    });
+    timer = setTimeout(() => {
+      from.classList.remove('is-current');
+      from.style.opacity = '0'; from.style.zIndex = '0';
+      if (from.tagName === 'VIDEO') from.pause();
+      to.classList.add('is-current');
+      to.style.transition = 'none'; to.style.zIndex = '1';
+      changing = false;
+      startedAt = performance.now();
+      preload((current + 1) % slides.length);
+      schedule();
+    }, FADE_MS);
   }
-  scheduleNext();
-  addEventListener('pagehide', () => clearTimeout(timer), {once:true});
+  preload(1);
+  schedule();
+  addEventListener('pagehide', () => clearTimeout(timer), { once:true });
 })();
