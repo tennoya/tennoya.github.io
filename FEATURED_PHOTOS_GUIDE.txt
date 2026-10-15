@@ -1,0 +1,7 @@
+【トップページの追加料理紹介の管理】
+・画像は assets/featured/ に保管。動画は assets/featured/cooking.mp4 です。
+・料理写真の追加・削除・表示順・写真名称は featured-dishes.js の配列だけ編集します。
+・料理紹介欄のデザイン変更は featured-dishes.css だけ編集します。
+・料理紹介欄の位置や動画差し替えは index.html 内の id="tennoya-featured" 部分で編集します。
+・既存の天丼／チャーハンのトップ背景切替、ブログ、BGM、掲示板、カウンターなどは変更していません。
+・アップロードはこのZIPを解凍して、フォルダごとサイトのルートへ（画像の階層は保持）。

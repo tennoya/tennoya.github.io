@@ -1,0 +1,13 @@
+/* トップページ・料理紹介専用。既存のスタイルとは分離 */
+#tennoya-featured{padding:64px 20px;background:#f5eee3;color:#2e231b;text-align:center}
+#tennoya-featured .featured-inner{max-width:1120px;margin:auto}
+#tennoya-featured h2{font-size:clamp(25px,4vw,34px);margin:0 0 12px}
+#tennoya-featured .featured-lead{line-height:1.8;margin:0 0 28px}
+#tennoya-featured .featured-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;text-align:left}
+#tennoya-featured figure{margin:0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 3px 12px #30201516}
+#tennoya-featured figure img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+#tennoya-featured figcaption{padding:12px 15px;font-size:16px;font-weight:bold}
+#tennoya-featured .featured-movie{max-width:740px;margin:36px auto 0}
+#tennoya-featured .featured-movie h3{font-size:22px;margin:0 0 14px}
+#tennoya-featured video{display:block;width:100%;max-height:420px;object-fit:contain;background:#17130f;border-radius:10px}
+@media(max-width:700px){#tennoya-featured{padding:40px 14px}#tennoya-featured .featured-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#tennoya-featured figcaption{font-size:14px;padding:9px 10px}}
