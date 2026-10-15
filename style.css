@@ -89,3 +89,19 @@
 .tn-photo-close{position:absolute;top:10px;right:12px;background:#fff;color:#222;border:0;border-radius:6px;padding:10px 16px;font-size:16px;cursor:pointer}
 #blog-posts .tn-post-photos img{cursor:zoom-in}
 
+
+
+/* 宴会案内の文章バランス調整 */
+.banquet-description{padding:38px clamp(20px,4vw,42px);text-align:left}
+.banquet-description h3{text-align:center;margin:0 0 18px;line-height:1.55;letter-spacing:.05em}
+.banquet-description p{max-width:38em;margin:0 auto 16px;text-align:left;line-height:2.15;letter-spacing:.02em;overflow-wrap:anywhere}
+.banquet-description .banquet-lead{font-weight:600}
+.banquet-description .banquet-note{margin:24px auto 4px;padding:14px 18px;text-align:center;background:#fbf5ee;border:1px solid #e4d3bf;border-radius:10px;font-size:17px;color:#7d3c30}
+.banquet-description .banquet-subheading{margin-top:34px;padding-top:26px;border-top:1px solid #eadccd}
+@media(max-width:650px){
+  .banquet-description{padding:26px 18px}
+  .banquet-description h3{font-size:21px;margin-bottom:14px}
+  .banquet-description p{font-size:15px;line-height:2.05;margin-bottom:14px}
+  .banquet-description .banquet-note{font-size:16px;padding:12px 14px;margin-top:20px}
+  .banquet-description .banquet-subheading{margin-top:26px;padding-top:20px}
+}
