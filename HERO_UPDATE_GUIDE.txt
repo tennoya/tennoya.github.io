@@ -1,0 +1,36 @@
+天乃八ホームページ：トップ画面の写真・動画 管理ガイド
+
+【トップの素材】
+写真8枚＋動画4本＝計12種類。すべて assets/hero-media/ にまとめてあります。
+5秒ごとにフェードで切り替わります。
+
+【素材を追加する】
+1. 写真（JPGなど）や動画（MP4）を assets/hero-media/ に入れる。
+2. hero-media.js を開き、既存の書き方に合わせて1行足す。
+   写真: { type: "image", src: "assets/hero-media/新しい写真.jpg" },
+   動画: { type: "video", src: "assets/hero-media/新しい動画.mp4" },
+3. 記載順が表示順です。行を移せば順番を変えられ、削除すれば表示から外せます。
+
+【役割別のファイル】
+hero-media.js           トップ写真・動画の一覧と順番
+hero-slideshow.js       5秒の切り替え・動画再生の動作
+hero-slideshow.css      トップの切り替えの見た目
+index.html              トップページ本体
+style.css               共通デザイン
+script.js               メニュー等の基本操作
+index-blog-photos.js    トップのブログ写真
+index-counter.js        訪問者数表示
+tennoya-firebase.js     ブログ・掲示板等のFirebase連携
+admin.js                管理者機能
+assets/hero-media/      トップ写真・動画12個すべて
+assets/images/          ほかのページも使う画像（既存のまま）
+food-photos/            料理ギャラリー用写真
+menu-pages/             日本語のグランドメニュー画像
+menu-pages-en/          英語のグランドメニュー画像
+
+【注意】
+GitHubへはZIPでなく、ZIPを解凍した「中身」をアップロード。
+以前のZIPですでにrootに tennoya_chahan_web.mp4 をアップロード済みの場合、
+更新後はその古いrootのMP4は使われません。GitHub上で削除しても構いません。
+同じ写真をほかのページで使用している場合に備え、assets/images/hero-tendon.jpg は残しています。
+既存のブログ・メニュー・アクセスなどのファイルは変更していません。

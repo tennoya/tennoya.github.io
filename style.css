@@ -46,36 +46,6 @@
 /* ===== ORIGINAL STYLE SECTION ===== */
 
 
-/* 2026-10-15 天乃八: 直接クロスフェード。旧CSSの透明タイミングを完全無効化 */
-.hero{position:relative;isolation:isolate;overflow:hidden}
-.hero > #tennoya-hero-tendon-slide,
-.hero > .tennoya-hero-fade-video{
-  position:absolute!important;inset:0!important;display:block!important;
-  box-sizing:border-box;width:100%!important;height:100%!important;
-  max-width:none!important;max-height:none!important;min-width:0!important;
-  object-fit:cover;object-position:center;pointer-events:none;
-  opacity:0;z-index:0;
-  animation:none!important;transform:none!important;
-  transition:none;
-}
-.hero > #tennoya-hero-tendon-slide{
-  background-repeat:no-repeat!important;
-  background-position:center!important;background-size:cover!important;
-}
-.hero::after{
-  content:"";position:absolute;inset:0;z-index:5;
-  pointer-events:none;
-  background:linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.13));
-}
-/* The original site's .hero>div:not(...) is more specific; override it deliberately. */
-.hero > div.tennoya-hero-caption{
-  position:relative!important;z-index:6!important;
-}
-@media(max-width:650px){
-  .hero>.tennoya-hero-fade-video{object-position:center 45%}
-}
-
-
 /* ===== ORIGINAL STYLE SECTION ===== */
 
 

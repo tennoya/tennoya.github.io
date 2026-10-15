@@ -1,0 +1,7 @@
+/* トップ画像・動画の切り替え表示専用 */
+.hero {position:relative;isolation:isolate;overflow:hidden;background-color:#201915!important;background-image:none!important}
+.hero .hero-slide {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;z-index:0;pointer-events:none;transition:none}
+.hero .hero-slide.is-current {opacity:1;z-index:1}
+.hero::after {content:"";position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.13))}
+.hero > .tennoya-hero-caption {position:relative!important;z-index:6!important}
+@media(max-width:650px){.hero .hero-slide{object-position:center 45%}}
