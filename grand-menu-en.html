@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>English Grand Menu | Tennoya</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#17130f;color:#f5e9d3;font-family:system-ui,"Noto Sans JP",sans-serif}header{padding:16px 4%;display:flex;justify-content:space-between;align-items:center;gap:14px;border-bottom:1px solid #806844}a{color:#eac58a}h1{text-align:center;font-size:clamp(23px,4vw,34px);margin:22px 0 8px}.sub{text-align:center;color:#d8c8b2;margin:0 12px 18px;font-size:14px}.book-area{width:min(1180px,97vw);margin:0 auto}.book{display:flex;justify-content:center;align-items:stretch;gap:0;min-height:240px;aspect-ratio:1.48;background:#382b1e;border:7px solid #6f4d2e;border-radius:8px;box-shadow:0 12px 32px #0009;overflow:hidden;touch-action:pan-y}.sheet{width:50%;height:100%;background:#fff;display:flex;justify-content:center;align-items:center;overflow:hidden;position:relative}.sheet:first-child{border-right:2px solid #b7a99a;box-shadow:inset -9px 0 12px -12px #000}.sheet:last-child{box-shadow:inset 9px 0 12px -12px #000}.sheet .page-image{display:block;width:100%;height:100%;object-fit:contain}.sheet.empty{background:#efe8db}.sheet.empty::after{content:'天乃八';color:#a98e67;font-size:clamp(16px,4vw,38px);letter-spacing:.3em}/* Page-turn animation: image snapshots of the current and next spreads */
+.book{position:relative;perspective:1500px;isolation:isolate}
+.flip-layer{position:absolute;top:0;bottom:0;width:50%;z-index:5;pointer-events:none;transform-style:preserve-3d;transition:transform .72s cubic-bezier(.2,.72,.2,1);backface-visibility:hidden;background:#fff;box-shadow:0 2px 18px #0005;overflow:hidden}
+.flip-layer img{width:100%;height:100%;object-fit:contain;display:block}
+.flip-layer.forward{right:0;transform-origin:left center}
+.flip-layer.backward{left:0;transform-origin:right center}
+.flip-layer.forward.turn{transform:rotateY(-180deg)}
+.flip-layer.backward.turn{transform:rotateY(180deg)}
+.book.animating .sheet{filter:brightness(.90)}
+@media(prefers-reduced-motion:reduce){.flip-layer{transition:none}}
+.controls{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 6px}.controls button{cursor:pointer;background:#b88b50;color:#17130f;border:0;border-radius:5px;font-size:16px;font-weight:bold;padding:12px 22px;min-width:112px}.controls button:disabled{opacity:.35;cursor:default}.status{min-width:110px;text-align:center;font-variant-numeric:tabular-nums}.help{text-align:center;color:#d8c8b2;font-size:13px;margin:8px 12px 20px}.links{text-align:center;padding:8px 12px 28px}.links a{display:inline-block;padding:11px 20px;border:1px solid #b99963;border-radius:4px;text-decoration:none;margin:5px}#notice{text-align:center;color:#f1d4a0;padding:8px 10px;min-height:28px}@media(max-width:600px){header{font-size:13px}.book{border-width:4px;min-height:140px}.controls{gap:8px}.controls button{min-width:95px;padding:12px 10px;font-size:14px}.status{min-width:90px;font-size:13px}}
+</style></head>
+<body><header><strong>天乃八 <small>てんのや</small></strong><a href="index.html">← Back to Home</a></header>
+<h1>English Grand Menu</h1><p class="sub">Flip through the menu like a book, two pages at a time.</p>
+<main class="book-area"><div class="book" id="book" aria-label="English menu book"><div class="sheet" id="left"></div><div class="sheet" id="right"></div></div>
+<div id="notice" role="status">Loading menu…</div>
+<div class="controls"><button id="prev" type="button" disabled>❮ Previous</button><span class="status" id="status">—</span><button id="next" type="button" disabled>Next ❯</button></div>
+<p class="help">Use the buttons, swipe, or ← → arrow keys to turn pages. Landscape mode is recommended on phones.</p>
+<div class="links"><a href="grand-menu.html">日本語メニュー / Japanese Menu</a><a href="grand-menu-en.pdf" target="_blank" rel="noopener">Open / Download English PDF</a></div></main>
+<script>
+(()=>{
+const book=document.getElementById('book'), notice=document.getElementById('notice'), status=document.getElementById('status'), prev=document.getElementById('prev'), next=document.getElementById('next');
+const left=document.getElementById('left'),right=document.getElementById('right');
+const count=28, maxSpread=Math.ceil((count-1)/2);
+let spread=0, turning=false, generation=0;
+const src=n=>'menu-pages-en/page-'+String(n).padStart(2,'0')+'.jpg';
+const cache=new Map();
+function preload(n){if(!n||n>count)return Promise.resolve(null);if(cache.has(n))return cache.get(n);const promise=new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('page '+n));im.src=src(n)});cache.set(n,promise);return promise;}
+const pages=i=>i===0?[null,1]:[i*2,i*2+1];
+function put(slot,n,img){slot.replaceChildren();slot.classList.toggle('empty',!n);if(img){const el=img.cloneNode();el.alt='Menu page '+n;el.className='page-image';slot.appendChild(el);}}
+function update(){prev.disabled=turning||spread===0;next.disabled=turning||spread===maxSpread;const [l,r]=pages(spread);status.textContent=spread===0?'Cover 1 / '+count:`${l}〜${Math.min(r,count)} / ${count}`;}
+async function display(i){const id=++generation;const [l,r]=pages(i);try{const [li,ri]=await Promise.all([preload(l),preload(r)]);if(id!==generation)return false;put(left,l,li);put(right,r,ri);spread=i;notice.textContent='';update();[...pages(i+1),...pages(i-1)].forEach(n=>{if(n&&n<=count)preload(n).catch(()=>{});});return true;}catch(e){notice.textContent='Could not load images. Extract the ZIP and keep menu-pages-en alongside this file.';return false;}}
+async function move(d){if(turning)return;const target=Math.max(0,Math.min(maxSpread,spread+d));if(target===spread)return;turning=true;update();const source=(d>0?right:left).querySelector('img');let layer=null;
+if(source&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){layer=document.createElement('div');layer.className='flip-layer '+(d>0?'forward':'backward');const image=source.cloneNode();layer.appendChild(image);book.appendChild(layer);book.classList.add('animating');}
+const success=await display(target);if(!success){layer?.remove();turning=false;update();return;}
+if(layer){requestAnimationFrame(()=>requestAnimationFrame(()=>layer.classList.add('turn')));await new Promise(resolve=>setTimeout(resolve,740));layer.remove();book.classList.remove('animating');}
+turning=false;update();}
+prev.onclick=()=>move(-1);next.onclick=()=>move(1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1)});
+let x=0,y=0;book.addEventListener('touchstart',e=>{x=e.changedTouches[0].screenX;y=e.changedTouches[0].screenY},{passive:true});book.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-x,dy=e.changedTouches[0].screenY-y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3)move(dx<0?1:-1)},{passive:true});
+update();display(0);
+})();
+</script></body></html>
